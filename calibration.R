@@ -11,6 +11,8 @@ library(tidyr)
 library(ggplot2)
 library(metafolio)
 library(EasyABC)
+install_github("wdelva/MABC")
+library(MABC)
 
 
 # 1. Target features
@@ -86,4 +88,23 @@ EAAA.Seq <- ABC_sequential(model = EAAA.calibration.wrapper,
                            seed_count = 0,
                            n_cluster = 4,
                            inside_prior = TRUE)
+
+# 4. Calibration with MABC
+mice.impute.norm <- mice::mice.impute.norm
+mice.impute.rf <- mice::mice.impute.rf
+EAAA.MABC <- MaC.weighted(targets.empirical = target.features.EAAA,
+                          RMSD.tol.max = 2,
+                          min.givetomice = 250,
+                          n.experiments = 500,
+                          lls = as.numeric(boundaries.matrix[ , 1]),
+                          uls = as.numeric(boundaries.matrix[ , 2]),
+                          model = EAAA.calibration.wrapper,
+                          strict.positive.params = 0,
+                          probability.params = 0,
+                          inside_prior = TRUE,
+                          method = "norm",
+                          predictorMatrix = "LASSO",
+                          maxit = 50,
+                          maxwaves = 4,
+                          n_cluster = 4)
 
